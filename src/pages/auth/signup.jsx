@@ -1,51 +1,47 @@
-import axios from "axios";
-import React, { useState } from "react";
-
+import React, { useEffect, useState } from "react";
+import { signupForm } from "../../apis/Auth/auth";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setSignUp } from "../../redux/AuthSlice";
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const signupForm = async () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isloggedIn = useSelector((state) => state.user.isloggedIn);
+  const isSignUp = useSelector((state) => state.user.isSignUp);
+  useEffect(() => {
+    if (isSignUp && isloggedIn === true) {
+      navigate("/main");
+    }
+  }, []);
+  const register = async () => {
     try {
-      const response = await axios.post(
-        "https://gym-backend-beta.vercel.app/api/user/signup",
-        {
-          email,
-          password,
-        }
-      );
-
-      alert(response.data.message);
+      const response = await signupForm(email, password);
+      console.log(response);
+      if (response.data.success) {
+        alert(response.data.message);
+        navigate("/login");
+        dispatch(setSignUp(true));
+        setEmail("");
+        setPassword("");
+      }
     } catch (error) {
       console.error(error);
       alert("Signup failed. Please try again.");
     }
   };
+
   return (
     <div className="container" id="container">
       <div className="form-container sign-up">
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            signupForm();
+            register();
           }}
         >
           <h1>Create Account</h1>
-          <div className="social-icons">
-            <a href="#" className="icon">
-              <i className="fa-brands fa-google-plus-g"></i>
-            </a>
-            <a href="#" className="icon">
-              <i className="fa-brands fa-facebook-f"></i>
-            </a>
-            <a href="#" className="icon">
-              <i className="fa-brands fa-github"></i>
-            </a>
-            <a href="#" className="icon">
-              <i className="fa-brands fa-linkedin-in"></i>
-            </a>
-          </div>
-          {/* <span>or use your email for registration</span> */}
-
           <input
             type="email"
             placeholder="Email"
